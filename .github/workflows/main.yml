@@ -21,7 +21,7 @@ jobs:
       - name: Snyk Code Test (fail on high)
         run: snyk code test --severity-threshold=high --sarif-file-output=snyk-code.sarif
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_TOKEN: a1eb8b76-9f7f-4ff8-8fcb-e951abcdfa23
 
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v2
