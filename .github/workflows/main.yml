@@ -1,12 +1,15 @@
 name: Snyk Code Scan
 
-on: [push, pull_request]
+on:
+  push:
+    branches: ["**"]  # Run on push to any branch
+  pull_request:
+    branches: ["**"]  # Run on PRs from any branch
 
 jobs:
   snyk:
     runs-on: ubuntu-latest
     permissions:
-      actions: read
       contents: read
       security-events: write
 
@@ -15,26 +18,17 @@ jobs:
 
       - uses: snyk/actions/setup@master
 
-      - name: Run Snyk Code test
-        run: |
-          snyk code test --sarif-file-output=snyk-code.sarif
-          ls -lh snyk-code.sarif
-          head -20 snyk-code.sarif
+      - name: Snyk Code Test (fail on high)
+        run: snyk code test --severity-threshold=high --sarif-file-output=snyk-code.sarif
         env:
-          SNYK_TOKEN: a1eb8b76-9f7f-4ff8-8fcb-e951abcdfa23
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk-code.sarif
 
-      - name: Snyk Monitor (upload results to Snyk)
+      - name: Snyk Monitor (optional)
         run: snyk monitor
         env:
           SNYK_TOKEN: a1eb8b76-9f7f-4ff8-8fcb-e951abcdfa23
-          
-
-      - name: Upload results to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: snyk-code.sarif
