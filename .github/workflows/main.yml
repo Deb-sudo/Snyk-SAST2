@@ -1,4 +1,4 @@
-name: Snyk SAST with SARIF Severity Patch
+name: Snyk Code Scan
 
 on:
   push:
@@ -7,44 +7,35 @@ on:
     branches: ["**"]
 
 jobs:
-  snyk-code-scan:
+  snyk:
     runs-on: ubuntu-latest
-    name: Snyk Code Scan
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+      - uses: snyk/actions/setup@master
 
-      - name: Run Snyk Code and generate SARIF
-        id: snyk_test
+      # 1. Run Snyk Code Test, but DO NOT fail the job immediately
+      - name: Run Snyk Code Scan (capture output, no fail)
         run: |
-          snyk code test --sarif-file-output=snyk-code.sarif || true
+          snyk code test \
+            --sarif-file-output=snyk-code.sarif \
+            --json-file-output=snyk-code.json \
+            || echo "Snyk Code found issues"
         env:
           SNYK_TOKEN: a1eb8b76-9f7f-4ff8-8fcb-e951abcdfa23
 
-      - name: List files for debugging
-        run: ls -l
-
-      - name: Check if SARIF exists
-        run: |
-          if [ -f snyk-code.sarif ]; then
-            echo "SARIF file found"
-          else
-            echo "SARIF file not found - skipping severity patch"
-            exit 0
-          fi
-
-      - name: Patch severity levels in SARIF
-        run: python3 scripts/update_sarif_severity.py snyk-code.sarif
-
-      - name: Upload SARIF to GitHub
+      # 2. Upload SARIF to GitHub Code Scanning
+      - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk-code.sarif
 
-          
+      # 4. Rerun Snyk with fail threshold (this will now fail the job)
+      - name: Fail if High Severity Found
+        run: snyk code test --severity-threshold=high
+        env:
+          SNYK_TOKEN: a1eb8b76-9f7f-4ff8-8fcb-e951abcdfa23
