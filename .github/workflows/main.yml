@@ -34,12 +34,6 @@ jobs:
         with:
           sarif_file: snyk-code.sarif
 
-      # 3. Upload snapshot to Snyk portal (monitor)
-      - name: Snyk Monitor
-        run: snyk monitor --project-name=my-project-code-sast --file=.
-        env:
-          SNYK_TOKEN: a1eb8b76-9f7f-4ff8-8fcb-e951abcdfa23
-
       # 4. Rerun Snyk with fail threshold (this will now fail the job)
       - name: Fail if High Severity Found
         run: snyk code test --severity-threshold=high
