@@ -2,9 +2,9 @@ name: Snyk Code Scan
 
 on:
   push:
-    branches: ["**"]  # Run on push to any branch
+    branches: ["**"]
   pull_request:
-    branches: ["**"]  # Run on PRs from any branch
+    branches: ["**"]
 
 jobs:
   snyk:
@@ -28,7 +28,8 @@ jobs:
         with:
           sarif_file: snyk-code.sarif
 
-      - name: Snyk Monitor (optional)
-        run: snyk monitor
+      - name: Snyk Monitor (upload to Snyk portal)
+        run: snyk monitor --project-name=dev-sast
         env:
           SNYK_TOKEN: a1eb8b76-9f7f-4ff8-8fcb-e951abcdfa23
+          
