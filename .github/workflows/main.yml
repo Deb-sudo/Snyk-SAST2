@@ -2,7 +2,9 @@ name: Snyk SAST with SARIF Severity Patch
 
 on:
   push:
-    branches: ["**"]  # Run on all branches
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
 
 jobs:
   snyk-code-scan:
@@ -19,9 +21,23 @@ jobs:
           python-version: '3.x'
 
       - name: Run Snyk Code and generate SARIF
-        run: snyk code test --sarif-file-output=snyk-code.sarif || true
+        id: snyk_test
+        run: |
+          snyk code test --sarif-file-output=snyk-code.sarif || true
         env:
           SNYK_TOKEN: a1eb8b76-9f7f-4ff8-8fcb-e951abcdfa23
+
+      - name: List files for debugging
+        run: ls -l
+
+      - name: Check if SARIF exists
+        run: |
+          if [ -f snyk-code.sarif ]; then
+            echo "SARIF file found"
+          else
+            echo "SARIF file not found - skipping severity patch"
+            exit 0
+          fi
 
       - name: Patch severity levels in SARIF
         run: python3 scripts/update_sarif_severity.py snyk-code.sarif
@@ -30,7 +46,5 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk-code.sarif
-
-
 
           
