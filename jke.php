@@ -3,9 +3,9 @@
  // test file
 // ❌ 1. SQL Injection
 $conn = new mysqli("localhost", "root", "password", "testdb");
-$username = $_GET['username'];
+$username = $_GET['usernames'];
 $password = $_GET['password'];
-$sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
+$sql = "SELECT * FROM users WHERE usernames = '$username' AND password = '$password'";
 $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     echo "Welcome, $username!";
