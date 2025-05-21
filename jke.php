@@ -1,6 +1,6 @@
 <?php
 // vulnerable.php
-
+ // test file
 // ❌ 1. SQL Injection
 $conn = new mysqli("localhost", "root", "password", "testdb");
 $username = $_GET['username'];
